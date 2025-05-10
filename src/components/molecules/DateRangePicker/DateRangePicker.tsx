@@ -100,6 +100,9 @@ const DateRangePicker: React.FC = () => {
             selected={localDate}
             onSelect={setLocalDate}
             numberOfMonths={2}
+            disabled={(date) =>
+              date > new Date() || date < new Date('2024-01-01')
+            }
           />
           <div className="flex flex-col gap-2 mt-2">
             <Button onClick={handleConfirmDropDate} className="flex-1">

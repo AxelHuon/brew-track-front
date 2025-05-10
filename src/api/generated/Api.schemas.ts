@@ -107,6 +107,26 @@ export interface GetDrinksByUserIdDTO {
   drinks: DrinkDTO[];
 }
 
+/**
+ * Nom du type de boisson et son nombre d'occurrences
+ */
+export type DrinkTypeCountDTODrinkTypeCounts = { [key: string]: number };
+
+export interface DrinkTypeCountDTO {
+  /** Nom du type de boisson et son nombre d'occurrences */
+  drinkTypeCounts: DrinkTypeCountDTODrinkTypeCounts;
+}
+
+/**
+ * Nombre de boissons consommées par mois
+ */
+export type MonthlyDrinkCountDTOMonthlyCounts = { [key: string]: number };
+
+export interface MonthlyDrinkCountDTO {
+  /** Nombre de boissons consommées par mois */
+  monthlyCounts: MonthlyDrinkCountDTOMonthlyCounts;
+}
+
 export interface AddDrinkDTO {
   /** Identifiant de l'utilisateur */
   userId: string;

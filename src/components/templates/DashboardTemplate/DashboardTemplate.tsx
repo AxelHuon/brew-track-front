@@ -1,6 +1,8 @@
 import {
   useGetDrinksByUserId,
   useGetDrinksType,
+  useGetDrinkTypeCountByUserId,
+  useGetMonthlyDrinkCount,
 } from '@/api/generated/drinks.ts';
 import DateRangePicker from '@/components/molecules/DateRangePicker/DateRangePicker.tsx';
 import DashboardCharts from '@/components/organisms/DashboardCharts/DashboardCharts.tsx';
@@ -16,6 +18,7 @@ import {
 import { useAppLayout } from '@/contexts/AppLayoutContext/AppLayoutContext.tsx';
 import { useAuth } from '@/contexts/AuthContext/AuthContext.tsx';
 import { useQueryState } from 'nuqs';
+import { useEffect } from 'react';
 
 export const DashboardTemplate = () => {
   const [alcohol, setAlcohol] = useQueryState('type');
@@ -39,6 +42,19 @@ export const DashboardTemplate = () => {
     }
     await setAlcohol(value);
   };
+
+  const { data: drinkTypeOfUser } = useGetDrinkTypeCountByUserId(
+    user?.id ?? ''
+  );
+
+  const { data: monthlyDrinkOfTheUser } = useGetMonthlyDrinkCount(
+    user?.id ?? ''
+  );
+
+  useEffect(() => {
+    console.log(drinkTypeOfUser);
+    console.log(monthlyDrinkOfTheUser);
+  }, [drinkTypeOfUser]);
 
   const { setIsDialogAddDrinkOpen } = useAppLayout();
 
