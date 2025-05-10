@@ -1,4 +1,4 @@
-import type { DrinkDTO } from '@/api/generated/Api.schemas.ts';
+import type { MonthlyAverageConsumptionDTO } from '@/api/generated/Api.schemas.ts';
 import {
   Card,
   CardContent,
@@ -17,9 +17,11 @@ import { TrendingUp } from 'lucide-react';
 import React from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts';
 
-const getMonthName = (date: string) => {
+const formatMonthKey = (monthKey: string) => {
+  const [year, month] = monthKey.split('-');
+  const date = new Date(parseInt(year), parseInt(month) - 1, 1);
   const options = { month: 'long', year: 'numeric' } as const;
-  return new Date(date).toLocaleDateString('fr-FR', options);
+  return date.toLocaleDateString('fr-FR', options);
 };
 
 const getSurroundingMonths = (currentMonth: string) => {
@@ -64,38 +66,77 @@ const getSurroundingMonths = (currentMonth: string) => {
   ];
 };
 
-const ChartByAverageLiters: React.FC<{ drinks: DrinkDTO[] }> = ({ drinks }) => {
-  const drinksByMonth = drinks.reduce<
-    Record<string, { totalLiters: number; count: number }>
-  >((acc, drink) => {
-    const monthKey = getMonthName(drink.drinkDate);
-    if (!acc[monthKey]) {
-      acc[monthKey] = { totalLiters: 0, count: 0 };
-    }
-    acc[monthKey].totalLiters += drink.litersConsumed;
-    acc[monthKey].count += 1;
-    return acc;
-  }, {});
-
-  let allMonths = Object.keys(drinksByMonth);
-  if (allMonths.length === 1) {
-    const [singleMonth] = allMonths;
-    allMonths = getSurroundingMonths(singleMonth);
+const ChartByAverageLiters: React.FC<{
+  monthlyAverageConsumption?: MonthlyAverageConsumptionDTO;
+}> = ({ monthlyAverageConsumption }) => {
+  // Si les données sont indisponibles, afficher un tableau vide
+  if (!monthlyAverageConsumption || !monthlyAverageConsumption.monthlyAverage) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Consommation moyenne de litres par mois</CardTitle>
+          <CardDescription>Aucune donnée disponible</CardDescription>
+        </CardHeader>
+      </Card>
+    );
   }
 
-  const chartData = allMonths.map((monthKey) => ({
-    month: monthKey,
-    averageLiters: drinksByMonth[monthKey]
-      ? parseFloat(
-          (
-            drinksByMonth[monthKey].totalLiters / drinksByMonth[monthKey].count
-          ).toFixed(2)
-        )
-      : 0,
-  }));
+  // Convertir le format de données en tableau pour le graphique
+  let formattedData = Object.entries(monthlyAverageConsumption.monthlyAverage)
+    .map(([monthKey, value]) => ({
+      originalKey: monthKey,
+      month: formatMonthKey(monthKey),
+      averageLiters: parseFloat(value.toFixed(2)),
+    }))
+    .sort((a, b) => {
+      // Trier par date (originalKey est au format YYYY-MM)
+      return a.originalKey.localeCompare(b.originalKey);
+    });
 
-  const lastMonthData = chartData[chartData.length - 2]?.averageLiters || 0;
-  const currentMonthData = chartData[chartData.length - 1]?.averageLiters || 0;
+  // S'il n'y a qu'un seul mois, ajouter les mois environnants
+  if (formattedData.length === 1) {
+    const singleMonth = formattedData[0].month;
+    const surroundingMonths = getSurroundingMonths(singleMonth);
+
+    // Créer un nouveau tableau de données incluant les mois environnants
+    formattedData = surroundingMonths.map((month) => {
+      const existingData = formattedData.find((item) => item.month === month);
+      if (existingData) {
+        return existingData;
+      }
+      // Créer une entrée pour les mois manquants
+      const monthIndex = month.split(' ')[0].toLowerCase();
+      const year = month.split(' ')[1];
+      const monthNumber =
+        [
+          'janvier',
+          'février',
+          'mars',
+          'avril',
+          'mai',
+          'juin',
+          'juillet',
+          'août',
+          'septembre',
+          'octobre',
+          'novembre',
+          'décembre',
+        ].indexOf(monthIndex) + 1;
+      const paddedMonth = monthNumber.toString().padStart(2, '0');
+
+      return {
+        originalKey: `${year}-${paddedMonth}`,
+        month: month,
+        averageLiters: 0,
+      };
+    });
+  }
+
+  // Calculer le changement de pourcentage entre le mois actuel et le mois précédent
+  const lastMonthData =
+    formattedData[formattedData.length - 2]?.averageLiters || 0;
+  const currentMonthData =
+    formattedData[formattedData.length - 1]?.averageLiters || 0;
   const percentageChange =
     lastMonthData > 0
       ? parseFloat(
@@ -120,7 +161,7 @@ const ChartByAverageLiters: React.FC<{ drinks: DrinkDTO[] }> = ({ drinks }) => {
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
-          <BarChart accessibilityLayer data={chartData}>
+          <BarChart accessibilityLayer data={formattedData}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="month"

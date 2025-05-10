@@ -1,4 +1,4 @@
-import type { DrinkDTO } from '@/api/generated/Api.schemas.ts';
+import type { MonthlyDrinkCountDTO } from '@/api/generated/Api.schemas.ts';
 import {
   Card,
   CardContent,
@@ -17,90 +17,31 @@ import { TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 
-const getMonthName = (date: string) => {
-  const options = { month: 'long' } as const;
-  return new Date(date).toLocaleDateString('fr-FR', options);
-};
+const ChartByMonths: React.FC<{
+  data: MonthlyDrinkCountDTO;
+}> = ({ data }) => {
+  const { monthlyCounts } = data;
 
-const generateSurroundingMonths = (monthName: string, year: number) => {
-  const months = [
-    'janvier',
-    'février',
-    'mars',
-    'avril',
-    'mai',
-    'juin',
-    'juillet',
-    'août',
-    'septembre',
-    'octobre',
-    'novembre',
-    'décembre',
-  ];
+  // On transforme les données reçues (objet clé-valeur) en tableau exploitable par le graphique
+  const sortedEntries = Object.entries(monthlyCounts).sort(
+    ([dateA], [dateB]) => new Date(dateA).getTime() - new Date(dateB).getTime()
+  );
 
-  const currentIndex = months.indexOf(monthName.toLowerCase());
-  if (currentIndex === -1) return []; // Sécurité
-
-  const getMonthYear = (indexOffset: number) => {
-    let newIndex = currentIndex + indexOffset;
-    let newYear = year;
-
-    if (newIndex < 0) {
-      newIndex += 12;
-      newYear -= 1;
-    } else if (newIndex >= 12) {
-      newIndex -= 12;
-      newYear += 1;
-    }
-
-    return { month: months[newIndex], year: newYear };
-  };
-
-  return [
-    getMonthYear(-2),
-    getMonthYear(-1),
-    { month: monthName, year },
-    getMonthYear(1),
-    getMonthYear(2),
-  ];
-};
-
-const ChartByMonths: React.FC<{ drinks: DrinkDTO[] }> = ({ drinks }) => {
-  const drinksByMonth = drinks
-    .sort((a, b) => {
-      return new Date(a.drinkDate).getTime() - new Date(b.drinkDate).getTime();
-    })
-    .reduce<Record<string, number>>((acc, drink) => {
-      const dateObj = new Date(drink.drinkDate);
-      const month = getMonthName(drink.drinkDate);
-      const year = dateObj.getFullYear();
-      const key = `${month} ${year}`;
-
-      acc[key] = (acc[key] || 0) + 1;
-      return acc;
-    }, {});
-
-  let allMonths = Object.keys(drinksByMonth);
-  if (allMonths.length === 1) {
-    const [singleMonth] = allMonths;
-    const [monthName, yearStr] = singleMonth.split(' ');
-    const surroundingMonths = generateSurroundingMonths(
-      monthName,
-      parseInt(yearStr, 10)
-    );
-    allMonths = surroundingMonths.map(({ month, year }) => `${month} ${year}`);
-  }
-
-  const chartData = allMonths.map((monthKey) => ({
-    month: monthKey,
-    count: drinksByMonth[monthKey] || 0,
+  const chartData = sortedEntries.map(([date, count]) => ({
+    month: new Date(date).toLocaleDateString('fr-FR', {
+      month: 'long',
+      year: 'numeric',
+    }),
+    count, // Valeur du nombre total
   }));
 
+  // Récupération des données des deux derniers mois pour afficher la tendance
   const lastMonthData =
     chartData.length > 1 ? chartData[chartData.length - 2].count : 0;
   const currentMonthData =
     chartData.length > 0 ? chartData[chartData.length - 1].count : 0;
 
+  // Calcul de la variation en pourcentage
   let percentageChange = 0;
   if (lastMonthData > 0) {
     percentageChange =
@@ -113,6 +54,7 @@ const ChartByMonths: React.FC<{ drinks: DrinkDTO[] }> = ({ drinks }) => {
   ) : (
     <TrendingDown className="h-4 w-4 text-red-500" />
   );
+
   const trendText = isIncrease
     ? `Tendance en hausse de ${percentageChange.toFixed(1)}% ce mois-ci`
     : `Tendance en baisse de ${Math.abs(percentageChange).toFixed(1)}% ce mois-ci`;

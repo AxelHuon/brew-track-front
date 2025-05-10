@@ -1,5 +1,9 @@
-import type { GetDrinksByUserIdDTO } from '@/api/generated/Api.schemas.ts';
-import ChartByAverageLiters from '@/components/molecules/Charts/ChartByAverageLiters/ChartByAverageLiters';
+import type {
+  DrinkTypeCountDTO,
+  MonthlyAverageConsumptionDTO,
+  MonthlyDrinkCountDTO,
+} from '@/api/generated/Api.schemas.ts';
+import ChartByAverageLiters from '@/components/molecules/Charts/ChartByAverageLiters/ChartByAverageLiters.tsx';
 import ChartByMonth from '@/components/molecules/Charts/ChartByMonth/ChartByMonth.tsx';
 import ChartByTypeOfDrinks from '@/components/molecules/Charts/ChartByTypeOfDrinks/ChartByTypeOfDrinks.tsx';
 import { Button } from '@/components/ui/button.tsx';
@@ -9,22 +13,23 @@ import { useQueryState } from 'nuqs';
 import React from 'react';
 
 interface DashBoardChartsProps {
-  drinksData?: GetDrinksByUserIdDTO;
   isLoading: boolean;
+  drinkTypeOfUser?: DrinkTypeCountDTO;
+  monthlyDrinkOfTheUser?: MonthlyDrinkCountDTO;
+  monthlyAverageConsumption?: MonthlyAverageConsumptionDTO;
 }
 
 const DashboardCharts: React.FC<DashBoardChartsProps> = ({
-  drinksData,
   isLoading,
+  drinkTypeOfUser,
+  monthlyDrinkOfTheUser,
+  monthlyAverageConsumption,
 }) => {
   const [alcohol, setAlcohol] = useQueryState('type');
   const resultEmpty =
-    !isLoading && drinksData?.drinks && drinksData.drinks.length === 0;
-  const resultEmptyBcOfFilter =
-    !isLoading &&
-    drinksData?.drinks &&
-    drinksData.drinks.length === 0 &&
-    alcohol !== null;
+    !isLoading && drinkTypeOfUser && Object.keys(drinkTypeOfUser).length === 0;
+  const resultEmptyBcOfFilter = !isLoading && !drinkTypeOfUser;
+  alcohol !== null;
 
   const handleResetFilter = async () => {
     await setAlcohol(null);
@@ -61,14 +66,16 @@ const DashboardCharts: React.FC<DashBoardChartsProps> = ({
           Aucune boisson consommée 😕
         </p>
       )}
-      {!resultEmpty && drinksData && drinksData.drinks && (
+      {!resultEmpty && drinkTypeOfUser && monthlyDrinkOfTheUser && (
         <>
-          {!alcohol && <ChartByTypeOfDrinks drinks={drinksData?.drinks} />}
-          <ChartByMonth drinks={drinksData.drinks} />
-          <ChartByAverageLiters drinks={drinksData.drinks} />
+          {!alcohol && <ChartByTypeOfDrinks data={drinkTypeOfUser} />}
+          <ChartByMonth data={monthlyDrinkOfTheUser} />
+          <ChartByAverageLiters
+            monthlyAverageConsumption={monthlyAverageConsumption}
+          />
         </>
       )}
-      {isLoading && !drinksData && (
+      {isLoading && !drinkTypeOfUser && !monthlyDrinkOfTheUser && (
         <>
           <Skeleton className="h-[446px]" />
           <Skeleton className="h-[446px]" />

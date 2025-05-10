@@ -1,4 +1,4 @@
-import type { DrinkDTO } from '@/api/generated/Api.schemas.ts';
+import type { DrinkTypeCountDTO } from '@/api/generated/Api.schemas.ts';
 import {
   Card,
   CardContent,
@@ -8,30 +8,18 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {
-  type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pie, PieChart } from 'recharts';
 
 interface ChartByTypeOfDrinksProps {
-  drinks: DrinkDTO[];
+  data: DrinkTypeCountDTO;
 }
 
-const ChartByTypeOfDrinks: React.FC<ChartByTypeOfDrinksProps> = ({
-  drinks,
-}) => {
-  const drinksByType = drinks.reduce<Record<string, number>>((acc, drink) => {
-    if (acc[drink.drinkType.name]) {
-      acc[drink.drinkType.name] += 1;
-    } else {
-      acc[drink.drinkType.name] = 1;
-    }
-    return acc;
-  }, {});
-  /* Convert to chart data */
+const ChartByTypeOfDrinks: React.FC<ChartByTypeOfDrinksProps> = ({ data }) => {
   const colorPalette = [
     'var(--chart-1)',
     'var(--chart-2)',
@@ -43,36 +31,39 @@ const ChartByTypeOfDrinks: React.FC<ChartByTypeOfDrinksProps> = ({
     'var(--chart-8)',
   ];
 
-  const chartData = Object.entries(drinksByType).map(
-    ([type, count], index) => ({
+  const chartData = useMemo(() => {
+    return Object.entries(data.drinkTypeCounts).map(([type, count], index) => ({
       type,
       count,
       fill: colorPalette[index % colorPalette.length],
-    })
-  );
-  const chartConfig = Object.fromEntries(
-    Object.keys(drinksByType).map((type, index) => [
-      type,
-      {
-        label: type.charAt(0).toUpperCase() + type.slice(1), // Capitalisation
-        color: colorPalette[index % colorPalette.length],
-      },
-    ])
-  ) satisfies ChartConfig;
-  const mostDrinkedType = chartData.reduce(
-    (acc, curr) => (curr.count > acc.count ? curr : acc),
-    {
-      type: '',
-      count: 0,
-      fill: '',
-    }
-  );
+    }));
+  }, [data.drinkTypeCounts]);
+
+  const mostDrinkedType = useMemo(() => {
+    return chartData.reduce((prev, current) =>
+      prev.count > current.count ? prev : current
+    );
+  }, [chartData]);
+
+  const currentYear = new Date().getFullYear();
+  const chartPeriod = `Janvier - Décembre ${currentYear}`;
+
+  const chartConfig = useMemo(() => {
+    return chartData.reduce((config, { type, fill }) => {
+      // @ts-ignore
+      config[type] = {
+        label: type,
+        color: fill,
+      };
+      return config;
+    }, {});
+  }, [chartData]);
 
   return (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
-        <CardTitle>Type d'alcool bus</CardTitle>
-        <CardDescription>Janvier - Décembre 2025</CardDescription>
+        <CardTitle>Type d'alcool consommé</CardTitle>
+        <CardDescription>{chartPeriod}</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
@@ -84,16 +75,27 @@ const ChartByTypeOfDrinks: React.FC<ChartByTypeOfDrinksProps> = ({
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
             />
-            <Pie data={chartData} dataKey="count" nameKey="type" stroke="0" />
+            <Pie
+              data={chartData}
+              dataKey="count"
+              nameKey="type"
+              stroke="0"
+              cx="50%"
+              cy="50%"
+              outerRadius={80}
+            />
           </PieChart>
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
-        <div className="flex items-center gap-2 font-medium leading-none">
-          C'est le/la {mostDrinkedType.type} que vous buvez le plus.
+        <div className="flex items-center gap-2 font-regular leading-none">
+          C'est le/la{' '}
+          <strong className={'font-medium'}>{mostDrinkedType.type}</strong> que
+          vous consommez le plus.
         </div>
         <div className="leading-none text-muted-foreground">
-          Votre retrospectives sur l'année 2025 en type d'alcool bus
+          Votre rétrospective pour l'année {currentYear} en types de boissons
+          consommées.
         </div>
       </CardFooter>
     </Card>

@@ -74,6 +74,57 @@ export interface DrinkTypeDTO {
 }
 
 /**
+ * Nom du type de boisson et son nombre d'occurrences
+ */
+export type DrinkTypeCountDTODrinkTypeCounts = { [key: string]: number };
+
+export interface DrinkTypeCountDTO {
+  /** Nom du type de boisson et son nombre d'occurrences */
+  drinkTypeCounts: DrinkTypeCountDTODrinkTypeCounts;
+}
+
+/**
+ * Nombre de boissons consommées par mois
+ */
+export type MonthlyDrinkCountDTOMonthlyCounts = { [key: string]: number };
+
+export interface MonthlyDrinkCountDTO {
+  /** Nombre de boissons consommées par mois */
+  monthlyCounts: MonthlyDrinkCountDTOMonthlyCounts;
+}
+
+/**
+ * Moyenne des litres consommés par mois
+ */
+export type MonthlyAverageConsumptionDTOMonthlyAverage = {
+  [key: string]: number;
+};
+
+export interface MonthlyAverageConsumptionDTO {
+  /** Moyenne des litres consommés par mois */
+  monthlyAverage: MonthlyAverageConsumptionDTOMonthlyAverage;
+}
+
+export interface AddDrinkDTO {
+  /** Identifiant de l'utilisateur */
+  userId: string;
+  /** Slug du type de boisson */
+  drinkTypeSlug: string;
+  /**
+   * Quantité consommée en litres
+   * @minimum 0
+   */
+  litersConsumed: number;
+  /** Date de consommation */
+  drinkDate: string;
+  /**
+   * Type de boisson personnalisé (si applicable)
+   * @nullable
+   */
+  customType?: string | null;
+}
+
+/**
  * Type de boisson personnalisé (si applicable)
  * @nullable
  */
@@ -100,53 +151,59 @@ export interface DrinkDTO {
   userId: string;
 }
 
-export interface GetDrinksByUserIdDTO {
+export interface DrinkCountDTO {
   /** Identifiant de l'utilisateur */
   userId: string;
-  /** Liste des boissons de l'utilisateur */
-  drinks: DrinkDTO[];
+  /** Nombre de boissons de l'utilisateur */
+  count: number;
 }
 
-/**
- * Nom du type de boisson et son nombre d'occurrences
- */
-export type DrinkTypeCountDTODrinkTypeCounts = { [key: string]: number };
-
-export interface DrinkTypeCountDTO {
-  /** Nom du type de boisson et son nombre d'occurrences */
-  drinkTypeCounts: DrinkTypeCountDTODrinkTypeCounts;
-}
-
-/**
- * Nombre de boissons consommées par mois
- */
-export type MonthlyDrinkCountDTOMonthlyCounts = { [key: string]: number };
-
-export interface MonthlyDrinkCountDTO {
-  /** Nombre de boissons consommées par mois */
-  monthlyCounts: MonthlyDrinkCountDTOMonthlyCounts;
-}
-
-export interface AddDrinkDTO {
-  /** Identifiant de l'utilisateur */
-  userId: string;
-  /** Slug du type de boisson */
-  drinkTypeSlug: string;
+export type GetDrinkTypeCountByUserIdParams = {
   /**
-   * Quantité consommée en litres
-   * @minimum 0
+   * Date minimum (YYYY-MM-DD)
    */
-  litersConsumed: number;
-  /** Date de consommation */
-  drinkDate: string;
+  drink_date_gte?: string;
   /**
-   * Type de boisson personnalisé (si applicable)
-   * @nullable
+   * Date maximum (YYYY-MM-DD)
    */
-  customType?: string | null;
-}
+  drink_date_lte?: string;
+  /**
+   * Type de boisson (slug)
+   */
+  type?: string;
+};
 
-export type GetDrinksByUserIdParams = {
+export type GetMonthlyDrinkCountParams = {
+  /**
+   * Date minimum (YYYY-MM-DD)
+   */
+  drink_date_gte?: string;
+  /**
+   * Date maximum (YYYY-MM-DD)
+   */
+  drink_date_lte?: string;
+  /**
+   * Type de boisson (slug)
+   */
+  type?: string;
+};
+
+export type GetMonthlyAverageConsumptionParams = {
+  /**
+   * Date minimum (YYYY-MM-DD)
+   */
+  drink_date_gte?: string;
+  /**
+   * Date maximum (YYYY-MM-DD)
+   */
+  drink_date_lte?: string;
+  /**
+   * Type de boisson (slug)
+   */
+  type?: string;
+};
+
+export type GetDrinkCountByUserIdParams = {
   /**
    * Date minimum (YYYY-MM-DD)
    */

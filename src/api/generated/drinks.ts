@@ -22,11 +22,15 @@ import type {
 
 import type {
   AddDrinkDTO,
+  DrinkCountDTO,
   DrinkDTO,
   DrinkTypeCountDTO,
   DrinkTypeDTO,
-  GetDrinksByUserIdDTO,
-  GetDrinksByUserIdParams,
+  GetDrinkCountByUserIdParams,
+  GetDrinkTypeCountByUserIdParams,
+  GetMonthlyAverageConsumptionParams,
+  GetMonthlyDrinkCountParams,
+  MonthlyAverageConsumptionDTO,
   MonthlyDrinkCountDTO,
 } from './Api.schemas';
 
@@ -170,202 +174,33 @@ export function useGetDrinksType<
 }
 
 /**
- * @summary Récupérer les boissons d'un utilisateur
- */
-export const getDrinksByUserId = (
-  userId: string,
-  params?: GetDrinksByUserIdParams,
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal
-) => {
-  return customInstance<GetDrinksByUserIdDTO>(
-    { url: `/api/drinks/${userId}`, method: 'GET', params, signal },
-    options
-  );
-};
-
-export const getGetDrinksByUserIdQueryKey = (
-  userId: string,
-  params?: GetDrinksByUserIdParams
-) => {
-  return [`/api/drinks/${userId}`, ...(params ? [params] : [])] as const;
-};
-
-export const getGetDrinksByUserIdQueryOptions = <
-  TData = Awaited<ReturnType<typeof getDrinksByUserId>>,
-  TError = void,
->(
-  userId: string,
-  params?: GetDrinksByUserIdParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getDrinksByUserId>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  }
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey =
-    queryOptions?.queryKey ?? getGetDrinksByUserIdQueryKey(userId, params);
-
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getDrinksByUserId>>
-  > = ({ signal }) => getDrinksByUserId(userId, params, requestOptions, signal);
-
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!userId,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof getDrinksByUserId>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
-
-export type GetDrinksByUserIdQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getDrinksByUserId>>
->;
-export type GetDrinksByUserIdQueryError = void;
-
-export function useGetDrinksByUserId<
-  TData = Awaited<ReturnType<typeof getDrinksByUserId>>,
-  TError = void,
->(
-  userId: string,
-  params: undefined | GetDrinksByUserIdParams,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getDrinksByUserId>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getDrinksByUserId>>,
-          TError,
-          Awaited<ReturnType<typeof getDrinksByUserId>>
-        >,
-        'initialData'
-      >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetDrinksByUserId<
-  TData = Awaited<ReturnType<typeof getDrinksByUserId>>,
-  TError = void,
->(
-  userId: string,
-  params?: GetDrinksByUserIdParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getDrinksByUserId>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getDrinksByUserId>>,
-          TError,
-          Awaited<ReturnType<typeof getDrinksByUserId>>
-        >,
-        'initialData'
-      >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetDrinksByUserId<
-  TData = Awaited<ReturnType<typeof getDrinksByUserId>>,
-  TError = void,
->(
-  userId: string,
-  params?: GetDrinksByUserIdParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getDrinksByUserId>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-/**
- * @summary Récupérer les boissons d'un utilisateur
- */
-
-export function useGetDrinksByUserId<
-  TData = Awaited<ReturnType<typeof getDrinksByUserId>>,
-  TError = void,
->(
-  userId: string,
-  params?: GetDrinksByUserIdParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getDrinksByUserId>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getGetDrinksByUserIdQueryOptions(
-    userId,
-    params,
-    options
-  );
-
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  query.queryKey = queryOptions.queryKey;
-
-  return query;
-}
-
-/**
  * @summary Récupérer le nombre de boissons par type pour un utilisateur
  */
 export const getDrinkTypeCountByUserId = (
   userId: string,
+  params?: GetDrinkTypeCountByUserIdParams,
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal
 ) => {
   return customInstance<DrinkTypeCountDTO>(
-    { url: `/api/drinks/${userId}/drinks-type-count`, method: 'GET', signal },
+    {
+      url: `/api/drinks/${userId}/drinks-type-count`,
+      method: 'GET',
+      params,
+      signal,
+    },
     options
   );
 };
 
-export const getGetDrinkTypeCountByUserIdQueryKey = (userId: string) => {
-  return [`/api/drinks/${userId}/drinks-type-count`] as const;
+export const getGetDrinkTypeCountByUserIdQueryKey = (
+  userId: string,
+  params?: GetDrinkTypeCountByUserIdParams
+) => {
+  return [
+    `/api/drinks/${userId}/drinks-type-count`,
+    ...(params ? [params] : []),
+  ] as const;
 };
 
 export const getGetDrinkTypeCountByUserIdQueryOptions = <
@@ -373,6 +208,7 @@ export const getGetDrinkTypeCountByUserIdQueryOptions = <
   TError = void,
 >(
   userId: string,
+  params?: GetDrinkTypeCountByUserIdParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -387,11 +223,13 @@ export const getGetDrinkTypeCountByUserIdQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetDrinkTypeCountByUserIdQueryKey(userId);
+    queryOptions?.queryKey ??
+    getGetDrinkTypeCountByUserIdQueryKey(userId, params);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getDrinkTypeCountByUserId>>
-  > = ({ signal }) => getDrinkTypeCountByUserId(userId, requestOptions, signal);
+  > = ({ signal }) =>
+    getDrinkTypeCountByUserId(userId, params, requestOptions, signal);
 
   return {
     queryKey,
@@ -415,6 +253,7 @@ export function useGetDrinkTypeCountByUserId<
   TError = void,
 >(
   userId: string,
+  params: undefined | GetDrinkTypeCountByUserIdParams,
   options: {
     query: Partial<
       UseQueryOptions<
@@ -442,6 +281,7 @@ export function useGetDrinkTypeCountByUserId<
   TError = void,
 >(
   userId: string,
+  params?: GetDrinkTypeCountByUserIdParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -469,6 +309,7 @@ export function useGetDrinkTypeCountByUserId<
   TError = void,
 >(
   userId: string,
+  params?: GetDrinkTypeCountByUserIdParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -492,6 +333,7 @@ export function useGetDrinkTypeCountByUserId<
   TError = void,
 >(
   userId: string,
+  params?: GetDrinkTypeCountByUserIdParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -508,6 +350,7 @@ export function useGetDrinkTypeCountByUserId<
 } {
   const queryOptions = getGetDrinkTypeCountByUserIdQueryOptions(
     userId,
+    params,
     options
   );
 
@@ -526,17 +369,29 @@ export function useGetDrinkTypeCountByUserId<
  */
 export const getMonthlyDrinkCount = (
   userId: string,
+  params?: GetMonthlyDrinkCountParams,
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal
 ) => {
   return customInstance<MonthlyDrinkCountDTO>(
-    { url: `/api/drinks/${userId}/monthly-count`, method: 'GET', signal },
+    {
+      url: `/api/drinks/${userId}/monthly-count`,
+      method: 'GET',
+      params,
+      signal,
+    },
     options
   );
 };
 
-export const getGetMonthlyDrinkCountQueryKey = (userId: string) => {
-  return [`/api/drinks/${userId}/monthly-count`] as const;
+export const getGetMonthlyDrinkCountQueryKey = (
+  userId: string,
+  params?: GetMonthlyDrinkCountParams
+) => {
+  return [
+    `/api/drinks/${userId}/monthly-count`,
+    ...(params ? [params] : []),
+  ] as const;
 };
 
 export const getGetMonthlyDrinkCountQueryOptions = <
@@ -544,6 +399,7 @@ export const getGetMonthlyDrinkCountQueryOptions = <
   TError = void,
 >(
   userId: string,
+  params?: GetMonthlyDrinkCountParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -558,11 +414,12 @@ export const getGetMonthlyDrinkCountQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetMonthlyDrinkCountQueryKey(userId);
+    queryOptions?.queryKey ?? getGetMonthlyDrinkCountQueryKey(userId, params);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getMonthlyDrinkCount>>
-  > = ({ signal }) => getMonthlyDrinkCount(userId, requestOptions, signal);
+  > = ({ signal }) =>
+    getMonthlyDrinkCount(userId, params, requestOptions, signal);
 
   return {
     queryKey,
@@ -586,6 +443,7 @@ export function useGetMonthlyDrinkCount<
   TError = void,
 >(
   userId: string,
+  params: undefined | GetMonthlyDrinkCountParams,
   options: {
     query: Partial<
       UseQueryOptions<
@@ -613,6 +471,7 @@ export function useGetMonthlyDrinkCount<
   TError = void,
 >(
   userId: string,
+  params?: GetMonthlyDrinkCountParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -640,6 +499,7 @@ export function useGetMonthlyDrinkCount<
   TError = void,
 >(
   userId: string,
+  params?: GetMonthlyDrinkCountParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -663,6 +523,7 @@ export function useGetMonthlyDrinkCount<
   TError = void,
 >(
   userId: string,
+  params?: GetMonthlyDrinkCountParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -677,7 +538,202 @@ export function useGetMonthlyDrinkCount<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getGetMonthlyDrinkCountQueryOptions(userId, options);
+  const queryOptions = getGetMonthlyDrinkCountQueryOptions(
+    userId,
+    params,
+    options
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * @summary Récupérer la moyenne des litres consommés par mois pour un utilisateur
+ */
+export const getMonthlyAverageConsumption = (
+  userId: string,
+  params?: GetMonthlyAverageConsumptionParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal
+) => {
+  return customInstance<MonthlyAverageConsumptionDTO>(
+    {
+      url: `/api/drinks/${userId}/monthly-average`,
+      method: 'GET',
+      params,
+      signal,
+    },
+    options
+  );
+};
+
+export const getGetMonthlyAverageConsumptionQueryKey = (
+  userId: string,
+  params?: GetMonthlyAverageConsumptionParams
+) => {
+  return [
+    `/api/drinks/${userId}/monthly-average`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetMonthlyAverageConsumptionQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMonthlyAverageConsumption>>,
+  TError = void,
+>(
+  userId: string,
+  params?: GetMonthlyAverageConsumptionParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getMonthlyAverageConsumption>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  }
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetMonthlyAverageConsumptionQueryKey(userId, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getMonthlyAverageConsumption>>
+  > = ({ signal }) =>
+    getMonthlyAverageConsumption(userId, params, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!userId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMonthlyAverageConsumption>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetMonthlyAverageConsumptionQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMonthlyAverageConsumption>>
+>;
+export type GetMonthlyAverageConsumptionQueryError = void;
+
+export function useGetMonthlyAverageConsumption<
+  TData = Awaited<ReturnType<typeof getMonthlyAverageConsumption>>,
+  TError = void,
+>(
+  userId: string,
+  params: undefined | GetMonthlyAverageConsumptionParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getMonthlyAverageConsumption>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMonthlyAverageConsumption>>,
+          TError,
+          Awaited<ReturnType<typeof getMonthlyAverageConsumption>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetMonthlyAverageConsumption<
+  TData = Awaited<ReturnType<typeof getMonthlyAverageConsumption>>,
+  TError = void,
+>(
+  userId: string,
+  params?: GetMonthlyAverageConsumptionParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getMonthlyAverageConsumption>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMonthlyAverageConsumption>>,
+          TError,
+          Awaited<ReturnType<typeof getMonthlyAverageConsumption>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetMonthlyAverageConsumption<
+  TData = Awaited<ReturnType<typeof getMonthlyAverageConsumption>>,
+  TError = void,
+>(
+  userId: string,
+  params?: GetMonthlyAverageConsumptionParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getMonthlyAverageConsumption>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Récupérer la moyenne des litres consommés par mois pour un utilisateur
+ */
+
+export function useGetMonthlyAverageConsumption<
+  TData = Awaited<ReturnType<typeof getMonthlyAverageConsumption>>,
+  TError = void,
+>(
+  userId: string,
+  params?: GetMonthlyAverageConsumptionParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getMonthlyAverageConsumption>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetMonthlyAverageConsumptionQueryOptions(
+    userId,
+    params,
+    options
+  );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
@@ -777,3 +833,184 @@ export const useAddDrink = <TError = void, TContext = unknown>(
 
   return useMutation(mutationOptions, queryClient);
 };
+/**
+ * @summary Récupérer le nombre de boissons d'un utilisateur
+ */
+export const getDrinkCountByUserId = (
+  userId: string,
+  params?: GetDrinkCountByUserIdParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal
+) => {
+  return customInstance<DrinkCountDTO>(
+    { url: `/api/drinks/${userId}/count`, method: 'GET', params, signal },
+    options
+  );
+};
+
+export const getGetDrinkCountByUserIdQueryKey = (
+  userId: string,
+  params?: GetDrinkCountByUserIdParams
+) => {
+  return [`/api/drinks/${userId}/count`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetDrinkCountByUserIdQueryOptions = <
+  TData = Awaited<ReturnType<typeof getDrinkCountByUserId>>,
+  TError = void,
+>(
+  userId: string,
+  params?: GetDrinkCountByUserIdParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getDrinkCountByUserId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  }
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetDrinkCountByUserIdQueryKey(userId, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getDrinkCountByUserId>>
+  > = ({ signal }) =>
+    getDrinkCountByUserId(userId, params, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!userId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getDrinkCountByUserId>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetDrinkCountByUserIdQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getDrinkCountByUserId>>
+>;
+export type GetDrinkCountByUserIdQueryError = void;
+
+export function useGetDrinkCountByUserId<
+  TData = Awaited<ReturnType<typeof getDrinkCountByUserId>>,
+  TError = void,
+>(
+  userId: string,
+  params: undefined | GetDrinkCountByUserIdParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getDrinkCountByUserId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getDrinkCountByUserId>>,
+          TError,
+          Awaited<ReturnType<typeof getDrinkCountByUserId>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetDrinkCountByUserId<
+  TData = Awaited<ReturnType<typeof getDrinkCountByUserId>>,
+  TError = void,
+>(
+  userId: string,
+  params?: GetDrinkCountByUserIdParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getDrinkCountByUserId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getDrinkCountByUserId>>,
+          TError,
+          Awaited<ReturnType<typeof getDrinkCountByUserId>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetDrinkCountByUserId<
+  TData = Awaited<ReturnType<typeof getDrinkCountByUserId>>,
+  TError = void,
+>(
+  userId: string,
+  params?: GetDrinkCountByUserIdParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getDrinkCountByUserId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Récupérer le nombre de boissons d'un utilisateur
+ */
+
+export function useGetDrinkCountByUserId<
+  TData = Awaited<ReturnType<typeof getDrinkCountByUserId>>,
+  TError = void,
+>(
+  userId: string,
+  params?: GetDrinkCountByUserIdParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getDrinkCountByUserId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetDrinkCountByUserIdQueryOptions(
+    userId,
+    params,
+    options
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}

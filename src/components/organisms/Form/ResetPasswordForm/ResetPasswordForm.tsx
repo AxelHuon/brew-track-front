@@ -73,7 +73,7 @@ const LoginForm: React.FC = () => {
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex flex-col gap-4 w-full"
       >
-        <div className={'flex gap-4'}>
+        <div className={`flex gap-4 ${isError ? 'items-end' : 'items-start'}`}>
           <FormField
             control={form.control}
             name="newPassword"
@@ -88,7 +88,6 @@ const LoginForm: React.FC = () => {
             )}
           />
           <FormField
-            control={form.control}
             name="confirmPassword"
             render={({ field }) => (
               <FormItem className={'w-full'}>

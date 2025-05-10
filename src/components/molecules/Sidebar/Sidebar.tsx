@@ -1,3 +1,5 @@
+import UserButtonSidebar from '@/components/molecules/Sidebar/Partials/UserButtonSidebar.tsx';
+import { Button } from '@/components/ui/button.tsx';
 import {
   Sidebar,
   SidebarContent,
@@ -7,69 +9,11 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
 } from '@/components/ui/sidebar.tsx';
-import { useAuth } from '@/contexts/AuthContext/AuthContext';
-import Cookies from 'js-cookie';
-import { BeerIcon, LayoutDashboardIcon, UsersIcon } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext/AuthContext.tsx';
+import React from 'react';
 
 const AppLayout: React.FC = () => {
-  const items = [
-    {
-      id: 'dashboard',
-      title: 'Dashboard',
-      url: '/dashboard',
-      type: 'classic',
-      icon: LayoutDashboardIcon,
-    },
-    {
-      id: 'rooms',
-      title: "Groupes d'amis",
-      url: '#',
-      type: 'subMenu',
-      icon: UsersIcon,
-      listItems: [
-        {
-          title: "Créer un groupe d'amis",
-        },
-        {
-          title: 'Liste de mes groupes',
-        },
-      ],
-    },
-    {
-      id: 'drinks',
-      title: 'Mes boissons',
-      url: '#',
-      type: 'subMenu',
-      icon: BeerIcon,
-      listItems: [
-        {
-          title: 'Ajouter une boisson',
-        },
-        {
-          title: 'Liste des boissons',
-        },
-      ],
-    },
-  ];
-
-  const [sidebarState, setSidebarState] = useState<Record<string, boolean>>({});
-
   const { user, logout } = useAuth();
-
-  useEffect(() => {
-    const cookieState = Cookies.get('side_bar_state');
-    if (cookieState) {
-      setSidebarState(JSON.parse(cookieState));
-    }
-  }, []);
-
-  const toggleSubMenu = (id: string) => {
-    const newSidebarState = { ...sidebarState };
-    newSidebarState[id] = !newSidebarState[id];
-    setSidebarState(newSidebarState);
-    Cookies.set('side_bar_state', JSON.stringify(newSidebarState));
-  };
 
   return (
     <Sidebar className={'w-[300px]'}>
@@ -82,7 +26,19 @@ const AppLayout: React.FC = () => {
           <SidebarGroupContent></SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter></SidebarFooter>
+      <SidebarFooter>
+        {user?.firstName && user?.lastName && (
+          <UserButtonSidebar
+            email={user?.email}
+            firstName={user?.firstName}
+            lastName={user?.lastName}
+            profilePicture={user?.profilePicture ?? undefined}
+          />
+        )}
+        <Button onClick={() => logout()} variant={'destructive'}>
+          Déconnexion
+        </Button>
+      </SidebarFooter>
     </Sidebar>
   );
 };
