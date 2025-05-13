@@ -24,10 +24,10 @@ const buttonVariants = cva(
           dark:hover:bg-destructive/80 dark:hover:text-white
         `,
         outline: `
-          border border-primary-500 bg-white shadow-xs 
-          hover:bg-primary-50 hover:text-primary-700 
+          border border-primary-500 bg-primary-50 shadow-xs 
+          hover:bg-primary-100 hover:text-primary-700 
           dark:border-primary-400 dark:bg-primary-800 dark:text-primary-50
-          dark:hover:bg-primary-700 dark:hover:text-primary-400
+          dark:hover:bg-primary-700 dark:hover:text-primary-50
         `,
         secondary: `
           bg-neutral-100 text-neutral-500 shadow-xs 

@@ -1,6 +1,6 @@
 {
-  "short_name": "Brew Track",
-  "name": "Brew Track",
+  "short_name": "Ottrack",
+  "name": "Ottrack",
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",

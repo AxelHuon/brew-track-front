@@ -7,11 +7,9 @@ import { NuqsAdapter } from 'nuqs/adapters/react';
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import reportWebVitals from './reportWebVitals.ts';
-// Import the generated route tree
 import { routeTree } from './routeTree.gen';
 import './styles.css';
 
-// Créer une instance de QueryClient
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -22,11 +20,10 @@ const queryClient = new QueryClient({
   },
 });
 
-// Create a new router instance
 const router = createRouter({
   routeTree,
   context: {
-    queryClient, // Ajouter queryClient au contexte du router
+    queryClient,
   },
   defaultPreload: 'intent',
   scrollRestoration: true,
@@ -34,7 +31,6 @@ const router = createRouter({
   defaultPreloadStaleTime: 0,
 });
 
-// RegisterTemplate the router instance for type safety
 declare module '@tanstack/react-router' {
   interface Register {
     router: typeof router;

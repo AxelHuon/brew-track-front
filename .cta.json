@@ -1,6 +1,6 @@
 {
   "framework": "react",
-  "projectName": "brew-track-front",
+  "projectName": "ottrack-front",
   "typescript": true,
   "tailwind": true,
   "packageManager": "pnpm",

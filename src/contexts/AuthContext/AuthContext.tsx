@@ -1,20 +1,12 @@
-import type {
-  AuthLoginGoogleRequestDTO,
-  AuthLoginRequestDTO,
-  UserDTO,
-} from '@/api/generated/Api.schemas';
+import type {AuthLoginGoogleRequestDTO, AuthLoginRequestDTO, UserDTO,} from '@/api/generated/Api.schemas';
 
-import {
-  usePostGoogleAuth,
-  usePostLogin,
-  usePostLogout,
-} from '@/api/generated/auth';
-import type { AccessTokenTypes } from '@/types/accessToken';
-import { authCookies } from '@/utils/authCookies';
-import { refreshTokens, setAuthTokens } from '@/utils/tokenRefresher';
-import { useNavigate } from '@tanstack/react-router';
-import { jwtDecode } from 'jwt-decode';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import {usePostGoogleAuth, usePostLogin, usePostLogout,} from '@/api/generated/auth';
+import type {AccessTokenTypes} from '@/types/accessToken';
+import {authCookies} from '@/utils/authCookies';
+import {refreshTokens, setAuthTokens} from '@/utils/tokenRefresher';
+import {useNavigate} from '@tanstack/react-router';
+import {jwtDecode} from 'jwt-decode';
+import React, {createContext, useContext, useEffect, useState} from 'react';
 
 /**
  * Interface defining the shape of the authentication context
@@ -104,9 +96,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(userData);
       setLoginErrorMessage(null);
       if (from) {
-        navigate({ to: from });
+        await navigate({ to: from });
       } else {
-        navigate({ to: '/' });
+        await navigate({ to: '/dashboard' });
       }
     } catch (error) {
       if (
@@ -138,7 +130,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (from) {
         navigate({ to: from });
       } else {
-        navigate({ to: '/' });
+        navigate({ to: '/dashboard' });
       }
     } catch (error) {
       console.error('Erreur de connexion Google:', error);
